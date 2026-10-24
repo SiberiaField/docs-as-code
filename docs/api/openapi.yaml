@@ -57,27 +57,27 @@ paths:
                     description: Примерное время (в минутах), которое потребуется для выполнения задачи
 
         '400':
-            description: Некорректный запрос
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorMessage'
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
 
         '500':
-            description: Вутренняя ошибка сервиса
-            content:
-              application/json:
-                schema:
-                  type: object
-                  required:
-                    - category
-                  properties:
-                    category:
-                      description: При внутренней ошибке сервиса все сообщения помечаются как обычные
-                      type: string
-                      enum: [
-                        "usual"
-                      ]
+          description: Вутренняя ошибка сервиса
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - category
+                properties:
+                  category:
+                    description: При внутренней ошибке сервиса все сообщения помечаются как обычные
+                    type: string
+                    enum: [
+                      "usual"
+                    ]
 
   /classify/{id}:
     get:
