@@ -1,0 +1,171 @@
+openapi: 3.0.3
+
+info:
+  title: Spam Detector API
+  description: API для работы с детектором спама
+  version: 1.0.0
+
+servers:
+  - url: https://example.com/api/v1
+
+components:
+  schemas:
+
+    ErrorMessage:
+      type: object
+      properties:
+        code:
+          description: Категория ошибки
+          type: string
+        message:
+          description: Детальная информация об ошибке
+          type: string
+
+paths:
+  /classify:
+    post:
+      summary: Классифицировать категорию сообщения
+      description: Отправляет запрос на классификацию в очередь
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  example: Привет, кинь данные кредитной карты, пожалуйста
+
+      responses:
+        '200':
+          description: Задача добавлена в очередь
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - task_id
+                properties:
+                  task_id:
+                    type: string
+                  time_to_complete:
+                    type: integer
+                    description: Примерное время (в минутах), которое потребуется для выполнения задачи
+
+        '400':
+            description: Некорректный запрос
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorMessage'
+
+        '500':
+            description: Вутренняя ошибка сервиса
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required:
+                    - category
+                  properties:
+                    category:
+                      description: При внутренней ошибке сервиса все сообщения помечаются как обычные
+                      type: string
+                      enum: [
+                        "usual"
+                      ]
+
+  /classify/{id}:
+    get:
+      summary: Смотрим статус задачи
+      description: Возвращает текущий статус задачи или результат выполнения
+
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+      responses:
+        '200':
+          description: Статус получен
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: string
+                    enum: [
+                      "PENDING",
+                      "PROCESSING",
+                      "COMPLETE",
+                      "FAILED"
+                    ]
+                  category:
+                    type: string
+                    enum: [
+                      "spam",
+                      "usual",
+                      "warning"
+                    ]
+                  confidence:
+                    type: number
+                    description: Уверенность модели в том, что полученное сообщение - спам 
+                  extra_info:
+                    type: string
+                    description: Дополнительная ифнормация о задаче (например, информация об ошибке)
+        
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    example: WRONG_TASK_ID
+                  message:
+                    type: string
+                    example: Задачи с ID {id} не существует
+
+  /ping:
+    get:
+      summary: Проверка состояния сервиса
+      description: Даёт информацию о текущей доступности сервиса
+
+      responses:
+        '200':
+          description: Сервис доступен
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - current_load
+                properties:
+                  current_load:
+                    description: Текущая загрузка сервиса определяется из кол-ва запросов в очереди в момент запроса
+                    type: string
+                    enum: [
+                      "low",
+                      "medium",
+                      "high"
+                    ]
+        
+        '500':
+          description: Сервис недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
