@@ -14,6 +14,9 @@ components:
     ErrorMessage:
       type: object
       properties:
+        required:
+          - code
+          - message
         code:
           description: Категория ошибки
           type: string
@@ -41,7 +44,7 @@ paths:
                   example: Привет, кинь данные кредитной карты, пожалуйста
 
       responses:
-        '200':
+        '202':
           description: Задача добавлена в очередь
           content:
             application/json:
@@ -123,14 +126,15 @@ paths:
                     type: string
                     description: Дополнительная ифнормация о задаче (например, информация об ошибке)
         
-        '400':
-          description: Неверный запрос
+        '404':
+          description: Задача не найдена
           content:
             application/json:
               schema:
                 type: object
                 required:
                   - code
+                  - message
                 properties:
                   code:
                     type: string
